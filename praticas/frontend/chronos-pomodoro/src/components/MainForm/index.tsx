@@ -21,6 +21,9 @@ export function MainForm() {
 
   const taskNameInput = useRef<HTMLInputElement>(null)
 
+  const lastTaskName =
+    state.tasks[state.tasks.length - 1]?.name || ''
+
   const nextCycle = getNextCycle(state.currentCycle)
   const nextCycleType = getNextCycleType(nextCycle)
 
@@ -86,6 +89,7 @@ export function MainForm() {
           type="text"
           placeholder="Digite algo"
           disabled={!!state.activeTask}
+          defaultValue={lastTaskName}
         />
       </div>
 
