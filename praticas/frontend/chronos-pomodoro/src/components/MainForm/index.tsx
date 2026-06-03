@@ -9,6 +9,8 @@ import { TaskActionTypes } from '../../contexts/TaskContext/TaskActions'
 import { getNextCycle } from '../../utils/getNextCycle'
 import { getNextCycleType } from '../../utils/getNextCycleType'
 
+import { showMessage } from '../../adapters/showMessage'
+
 import { Cycles } from '../Cycles'
 import { Tips } from '../Tips'
 import { DefaultButton } from '../DefaultButton'
@@ -27,12 +29,14 @@ export function MainForm() {
   ) {
     event.preventDefault()
 
+    showMessage.dismiss()
+
     if (taskNameInput.current === null) return
 
     const taskName = taskNameInput.current.value.trim()
 
     if (!taskName) {
-      alert('Digite o nome da tarefa')
+      showMessage.warn('Digite o nome da tarefa')
       return
     }
 
@@ -51,11 +55,17 @@ export function MainForm() {
       payload: newTask,
     })
 
+    showMessage.success('Tarefa iniciada')
+
     taskNameInput.current.value = ''
   }
 
   function handleInterruptTask() {
+    showMessage.dismiss()
+
     if (!state.activeTask) return
+
+    showMessage.error('Tarefa interrompida!')
 
     dispatch({
       type: TaskActionTypes.INTERRUPT_TASK,
