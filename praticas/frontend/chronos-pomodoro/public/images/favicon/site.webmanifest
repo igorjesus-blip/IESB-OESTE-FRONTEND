@@ -1,0 +1,17 @@
+{
+  "name": "Chronos Pomodoro",
+  "short_name": "Chronos",
+  "description": "Aplicativo Pomodoro para gerenciamento de foco e produtividade",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#10b981",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "/images/favicon/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
