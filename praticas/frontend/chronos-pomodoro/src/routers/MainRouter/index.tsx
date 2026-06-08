@@ -4,12 +4,12 @@ import {
   Route,
   Routes,
   useLocation,
-} from 'react-router'
+} from 'react-router-dom'
 
 import { Home } from '../../pages/Home'
 import { AboutPomodoro } from '../../pages/AboutPomodoro'
-import { History } from '../../pages/History'
 import { Settings } from '../../pages/Settings'
+import { History } from '../../pages/History'
 import { NotFound } from '../../pages/NotFound'
 
 function ScrollToTop() {
@@ -30,13 +30,14 @@ export function MainRouter() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/history/" element={<History />} />
-        <Route path="/settings/" element={<Settings />} />
 
         <Route
           path="/about-pomodoro/"
           element={<AboutPomodoro />}
         />
+
+        <Route path="/settings/" element={<Settings />} />
+        <Route path="/history/" element={<History />} />
 
         <Route path="*" element={<NotFound />} />
       </Routes>
