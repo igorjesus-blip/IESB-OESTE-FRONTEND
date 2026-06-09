@@ -1,13 +1,29 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Settings {
+  id             Int      @id @default(1)
+  workTime       Int
+  shortBreakTime Int
+  longBreakTime  Int
+  updatedAt      DateTime @updatedAt
+}
+
+model Task {
+  id            String   @id
+  name          String
+  duration      Int
+  type          String
+  startDate     BigInt
+  completeDate  BigInt?
+  interruptDate BigInt?
+  createdAt     DateTime @default(now())
+
+  @@index([startDate])
 }
