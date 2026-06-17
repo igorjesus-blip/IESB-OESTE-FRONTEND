@@ -15,7 +15,7 @@ type TaskContextProviderProps = {
 export function TaskContextProvider({
   children,
 }: TaskContextProviderProps) {
-  const [state, dispatch] = useReducer(
+  const [state, baseDispatch] = useReducer(
     taskReducer,
     initialTaskState,
     () => {
@@ -41,9 +41,103 @@ export function TaskContextProvider({
     },
   )
 
+  // Wrap dispatch to sync with backend API
+  const API_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3333'
+
+  const dispatch: typeof baseDispatch = (action) => {
+    try {
+      switch (action.type) {
+        case TaskActionTypes.START_TASK: {
+          // create task in backend
+          const task = action.payload
+          fetch(`${API_URL}/tasks`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: task.id,
+              name: task.name,
+              duration: task.duration,
+              type: task.type,
+              startDate: String(task.startDate),
+              completeDate: task.completeDate,
+              interruptDate: task.interruptDate,
+            }),
+          }).catch(err => console.warn('Failed to create task on server', err))
+
+          break
+        }
+
+        case TaskActionTypes.INTERRUPT_TASK: {
+          if (state.activeTask) {
+            const id = state.activeTask.id
+            const interruptDate = Date.now()
+            fetch(`${API_URL}/tasks/${id}/interrupt`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ interruptDate }),
+            }).catch(err => console.warn('Failed to set interruptDate on server', err))
+          }
+
+          break
+        }
+
+        case TaskActionTypes.COMPLETE_TASK: {
+          if (state.activeTask) {
+            const id = state.activeTask.id
+            const completeDate = Date.now()
+            fetch(`${API_URL}/tasks/${id}/complete`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ completeDate }),
+            }).catch(err => console.warn('Failed to set completeDate on server', err))
+          }
+
+          break
+        }
+
+        case TaskActionTypes.CHANGE_SETTINGS: {
+          const cfg = action.payload
+          fetch(`${API_URL}/settings`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(cfg),
+          }).catch(err => console.warn('Failed to update settings on server', err))
+
+          break
+        }
+
+        default:
+          break
+      }
+    } catch (err) {
+      console.warn('Error syncing with API', err)
+    }
+
+    baseDispatch(action as any)
+  }
+
   const playBeepRef = useRef<
     ReturnType<typeof loadBeep> | null
   >(null)
+
+  // Load settings from backend on mount
+  useEffect(() => {
+    fetch(`${API_URL}/settings`)
+      .then(res => res.json())
+      .then(data => {
+        if (data && typeof data.workTime === 'number') {
+          baseDispatch({
+            type: TaskActionTypes.CHANGE_SETTINGS,
+            payload: {
+              workTime: data.workTime,
+              shortBreakTime: data.shortBreakTime,
+              longBreakTime: data.longBreakTime,
+            },
+          })
+        }
+      })
+      .catch(err => console.warn('Failed to load settings from server', err))
+  }, [])
 
   useEffect(() => {
     localStorage.setItem('state', JSON.stringify(state))
